@@ -3,7 +3,14 @@ import 'package:flutter_application_hungray/shared/custom_text.dart';
 import 'package:gap/gap.dart';
 
 class OrderDetailsWidget extends StatelessWidget {
-  const OrderDetailsWidget({super.key, required this.order, required this.taxes, required this.deliveryFees, required this.total, required this.estimatedTime});
+  const OrderDetailsWidget({
+    super.key,
+    required this.order,
+    required this.taxes,
+    required this.deliveryFees,
+    required this.total,
+    required this.estimatedTime,
+  });
   final String order, taxes, deliveryFees, total, estimatedTime;
 
   @override
@@ -11,8 +18,8 @@ class OrderDetailsWidget extends StatelessWidget {
     return Column(
       children: [
         checkoutWidget(
-          title: 'Hamburger',
-          price: order  ,
+          title: 'order',
+          price: order,
           isBlod: false,
           isSmall: false,
         ),
@@ -42,7 +49,7 @@ class OrderDetailsWidget extends StatelessWidget {
         Gap(10),
         checkoutWidget(
           title: 'Estimated Delivery time ',
-          price: estimatedTime ,
+          price: estimatedTime,
           isBlod: true,
           isSmall: true,
         ),

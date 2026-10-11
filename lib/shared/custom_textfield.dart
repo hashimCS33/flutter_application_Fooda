@@ -28,14 +28,11 @@ class _CustomTextfildState extends State<CustomTextfild> {
     _obscureText = widget.isPassword;
   }
 
-
   void _toggleObscureText() {
     setState(() {
       _obscureText = !_obscureText;
     });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -51,11 +48,17 @@ class _CustomTextfildState extends State<CustomTextfild> {
       },
       obscureText: _obscureText,
       decoration: InputDecoration(
-        suffixIcon: 
-        widget.isPassword ? GestureDetector(
-          onTap: () => _toggleObscureText(),
-          child : Icon(_obscureText ? CupertinoIcons.eye : CupertinoIcons.eye_slash),
-        ) : null,
+        suffixIcon:
+            widget.isPassword
+                ? GestureDetector(
+                  onTap: () => _toggleObscureText(),
+                  child: Icon(
+                    _obscureText
+                        ? CupertinoIcons.eye
+                        : CupertinoIcons.eye_slash,
+                  ),
+                )
+                : null,
         prefixIcon:
             widget.isPassword
                 ? const Icon(Icons.lock)

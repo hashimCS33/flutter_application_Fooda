@@ -25,7 +25,11 @@ class UserModel {
       token: json['token'],
       visa: json['visa'],
       address: json['address'],
-      imageUrl: json['image_url'],
+      // Android emulator can't reach the host via 127.0.0.1/localhost; use 10.0.2.2 like the API base URL.
+      imageUrl: json['image_url']?.toString().replaceFirst(
+        RegExp(r'^https?://(127\.0\.0\.1|localhost)'),
+        'http://10.0.2.2',
+      ),
     );
   }
 }

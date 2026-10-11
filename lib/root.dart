@@ -1,5 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_hungray/Core/Constanst/app_Colors.dart';
+import 'package:flutter_application_hungray/Features/auth/cubit/profile_cubit.dart';
+import 'package:flutter_application_hungray/Features/cart/cubit/cart_cubit.dart';
+import 'package:flutter_application_hungray/Features/home/cubit/home_cubit.dart';
+import 'package:flutter_application_hungray/Features/orderHistory/cubit/orders_cubit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_application_hungray/Features/cart/view/CartView.dart';
 import 'package:flutter_application_hungray/Features/auth/view/profile_view.dart';
 import 'package:flutter_application_hungray/Features/home/views/HomeView.dart';
@@ -33,14 +39,29 @@ class _RootState extends State<Root> {
   Widget _buildPage(int index) {
     switch (index) {
       case 0:
-        return const HomeView();
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (_) => HomeCubit()..getProducts()),
+            BlocProvider(create: (_) => ProfileCubit()..refresh(silent: true)),
+          ],
+          child: const HomeView(),
+        );
       case 1:
-        return const CartView();
+        return BlocProvider(
+          create: (_) => CartCubit()..fetchCart(),
+          child: const CartView(),
+        );
       case 2:
-        return const OrderHistoryView();
+        return BlocProvider(
+          create: (_) => OrdersCubit()..fetchOrders(),
+          child: const OrderHistoryView(),
+        );
       case 3:
       default:
-        return const ProfileView();
+        return BlocProvider(
+          create: (_) => ProfileCubit()..load(),
+          child: const ProfileView(),
+        );
     }
   }
 
@@ -66,40 +87,39 @@ class _RootState extends State<Root> {
       onTap: () => _onTapNavItem(index),
       child:
           selected
-              ? Container( 
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              ? Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                height: 200,
+                width: 59,
                 decoration: BoxDecoration(
-                  
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(30)
+                  color: const Color.fromARGB(255, 168, 168, 168),
+                  borderRadius: BorderRadius.circular(30),
                 ),
-                child:  Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(selectedIcon, color: Colors.black87, size: 20),
-                const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(selectedIcon, color: AppColors.primary, size: 20),
+                    const SizedBox(width: 6),
+                  ],
                 ),
-              ],
-            ),
-          )
-
+              )
               : Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, color: Colors.grey.shade500, size: 22),
+                  Icon(
+                    icon,
+                    color: const Color.fromARGB(255, 16, 16, 16),
+                    size: 22,
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     label,
                     style: TextStyle(
                       fontSize: 11,
-                      color: Colors.grey.shade500,
+                      color: const Color.fromARGB(255, 5, 5, 5),
                     ),
                   ),
                 ],
@@ -110,64 +130,84 @@ class _RootState extends State<Root> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView.custom(
-        controller: cntroller,
-        physics: const NeverScrollableScrollPhysics(),
-        childrenDelegate: SliverChildBuilderDelegate(
-          (context, index) => _buildPage(index),
-          childCount: _pageCount,
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.40),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
+      body: Stack(
+        children: [
+          PageView.custom(
+            controller: cntroller,
+            physics: const NeverScrollableScrollPhysics(),
+            childrenDelegate: SliverChildBuilderDelegate(
+              (context, index) => _buildPage(index),
+              childCount: _pageCount,
+            ),
           ),
-          child: Padding(
-            padding: EdgeInsetsGeometry.fromLTRB(20, 14,20, 14),
-            child: SafeArea(
-              top: false,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildNavItem(
-                    index: 0,
-                    icon: CupertinoIcons.home,
-                    selectedIcon: CupertinoIcons.home,
-                    label: 'Home',
-                  ),
-                  _buildNavItem(
-                    index: 1,
-                    icon: CupertinoIcons.cart,
-                    selectedIcon: CupertinoIcons.cart,
-                    label: 'Cart',
-                  ),
-                  _buildNavItem(
-                    index: 2,
-                    icon: Icons.local_restaurant_sharp,
-                    selectedIcon: Icons.local_restaurant_sharp,
-                    label: 'History',
-                  ),
-                  _buildNavItem(
-                    index: 3,
-                    icon: CupertinoIcons.person,
-                    selectedIcon: CupertinoIcons.back,
-                    label: 'Profile',
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: 12,
+            child: Container(
+              height: 70,
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(
+                  255,
+                  240,
+                  167,
+                  167,
+                ).withValues(alpha: 0.90),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color.fromARGB(255, 255, 255, 255),
+                    const Color.fromARGB(255, 151, 137, 137),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(50),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.15),
+                    blurRadius: 20,
+                    offset: const Offset(0, 3),
                   ),
                 ],
               ),
+              child: Padding(
+                padding: const EdgeInsetsGeometry.fromLTRB(20, 14, 20, 14),
+                child: SafeArea(
+                  top: false,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildNavItem(
+                        index: 0,
+                        icon: CupertinoIcons.home,
+                        selectedIcon: CupertinoIcons.home,
+                        label: 'Home',
+                      ),
+                      _buildNavItem(
+                        index: 1,
+                        icon: CupertinoIcons.cart,
+                        selectedIcon: CupertinoIcons.cart,
+                        label: 'Cart',
+                      ),
+                      _buildNavItem(
+                        index: 2,
+                        icon: Icons.local_restaurant_sharp,
+                        selectedIcon: Icons.local_restaurant_sharp,
+                        label: 'History',
+                      ),
+                      _buildNavItem(
+                        index: 3,
+                        icon: CupertinoIcons.person,
+                        selectedIcon: CupertinoIcons.back,
+                        label: 'Profile',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

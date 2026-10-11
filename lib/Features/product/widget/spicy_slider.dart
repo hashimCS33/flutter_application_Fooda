@@ -4,42 +4,49 @@ import 'package:flutter_application_hungray/shared/custom_text.dart';
 import 'package:gap/gap.dart';
 
 class SpicySlider extends StatelessWidget {
-  const SpicySlider({super.key, required double sliderValue, required ValueChanged<double> onSliderChanged})
-      : value = sliderValue,
-        _onChanged = onSliderChanged;
+  const SpicySlider({
+    super.key,
+    required this.productimage,
+    required double sliderValue,
+    required ValueChanged<double> onSliderChanged,
+  }) : value = sliderValue,
+       _onChanged = onSliderChanged;
+
+  final String productimage;
 
   final double value;
   final ValueChanged<double> _onChanged;
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       children: [
-        Image.asset('assets/detail/sandwitch_detail.png', height: 250),
-        Spacer(),
-        Column(
+        Image.network(productimage),
+        Gap(10),
+        CustomText(
+          text: 'Customize Your Burger to Your Tastes.\n Ultimate Experience',
+          fontweight: FontWeight.bold,
+          maxLines: 5,
+        ),
+        Gap(10),
+        Slider(
+          min: 0,
+          max: 1,
+          value: value,
+          onChanged: _onChanged,
+          inactiveColor: Colors.grey.shade300,
+          activeColor: AppColors.primary,
+        ),
+        Row(
           children: [
+            Gap(40),
             CustomText(
-              text:
-                  'Customize Your Burger\n to Your Tastes.\n Ultimate Experience',
-              fontweight: FontWeight.bold,
+              text: 'Cold 🥶',
+              color: const Color.fromARGB(255, 2, 2, 2),
             ),
-
-            Slider(
-              min: 0,
-              max: 1,
-              value: value,
-              onChanged: _onChanged,
-              inactiveColor: Colors.grey.shade300,
-              activeColor: AppColors.primary,
-            ),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                CustomText(text: '🥶', color: Colors.grey),
-                Gap(100),
-                CustomText(text: '🌶️', color: Colors.grey),
-              ],
+            Gap(200),
+            CustomText(
+              text: 'Hot 🌶️',
+              color: const Color.fromARGB(255, 0, 0, 0),
             ),
           ],
         ),

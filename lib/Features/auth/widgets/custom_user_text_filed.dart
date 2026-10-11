@@ -9,7 +9,9 @@ class CustomUserTextField extends StatefulWidget {
     this.isPassword = false,
     this.suffixIcon,
     this.keyboardType,
-    this.borderColor, this.width, this.hinttext,
+    this.borderColor,
+    this.width,
+    this.hinttext,
   });
 
   final TextEditingController controller;
@@ -18,7 +20,7 @@ class CustomUserTextField extends StatefulWidget {
   final Widget? suffixIcon;
   final TextInputType? keyboardType;
   final Color? borderColor;
-  final double? width ;
+  final double? width;
   final String? hinttext;
 
   @override
@@ -27,8 +29,6 @@ class CustomUserTextField extends StatefulWidget {
 
 class _CustomUserTextFieldState extends State<CustomUserTextField> {
   late bool _obscureText;
-
-
 
   @override
   void initState() {

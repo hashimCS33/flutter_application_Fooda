@@ -163,16 +163,15 @@ class AuthRepo {
   //logout method
 
   Future<void> logout() async {
-    final response = await apiService.post('/logout', {});
-
-    if (response['data'] != null) {
-      throw ApiErorr(message: 'Erorr');
+    try {
+      await apiService.post('/logout', {}).timeout(const Duration(seconds: 3));
+    } catch (_) {
+      // Ignore server/network errors here: still clear the local session below.
+    } finally {
+      await prefHelper.clearToken();
+      currentUser = null;
+      isGuest = true;
     }
-
-    await prefHelper.clearToken();
-
-    currentUser = null;
-    isGuest = true;
   }
 
   //auto login

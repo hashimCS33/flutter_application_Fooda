@@ -5,6 +5,7 @@ import 'package:flutter_application_hungray/Features/auth/view/login_view.dart';
 import 'package:flutter_application_hungray/root.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
+import 'package:lottie/lottie.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -22,41 +23,40 @@ class _SplashScreenState extends State<SplashScreen>
   AuthRepo authRepo = AuthRepo();
 
   Future<void> checkLogin() async {
-   try{
-      final user= await authRepo.autoLogin();
+    try {
+      final user = await authRepo.autoLogin();
 
-      if(!mounted) return;
-   
+      if (!mounted) return;
 
       if (authRepo.isGuest) {
-        // debugPrint('Navgitor to Root as guest');
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => Root()),
-      );
-    } else if (user != null) {
-      // debugPrint('Navgitor to Root as loogined-in user');
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => Root()),
-      );
-    } else {
-      // debugPrint('Navgitor to Root as loogined-no user data');
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginView()),
-      );
+    
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Root()),
+        );
+      } else if (user != null) {
+       
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Root()),
+        );
+      } else {
+      
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginView()),
+        );
+      }
+    } catch (e) {
+      print('Erorr From slpash :${e.toString()}');
     }
-   }catch (e){
-     print('Erorr From slpash :${e.toString()}');
-   }
   }
 
   @override
   void initState() {
     super.initState();
 
-    // 1. إعداد متحكم الأنيميشن (المدة ثانية ونصف)
+ 
     _controller = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
@@ -72,7 +72,7 @@ class _SplashScreenState extends State<SplashScreen>
     _controller.forward();
 
     // 4. الانتقال للشاشة التالية بعد 3 ثوانٍ
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 6), () {
       if (!mounted) return;
       checkLogin();
     });
@@ -102,7 +102,15 @@ class _SplashScreenState extends State<SplashScreen>
               ),
             ),
             const Spacer(),
-            Image.asset("assets/splash/splash.png"),
+            
+
+            Lottie.asset(
+              "assets/animation/Hamburger Loading.json"
+               ,
+               repeat: true,
+               animate: true,
+               
+              ),
           ],
         ),
       ),

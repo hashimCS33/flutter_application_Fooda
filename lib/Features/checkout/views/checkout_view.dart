@@ -1,21 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_hungray/Core/Constanst/app_Colors.dart';
+import 'package:flutter_application_hungray/Features/auth/cubit/profile_cubit.dart';
+import 'package:flutter_application_hungray/Features/auth/cubit/profile_states.dart';
+import 'package:flutter_application_hungray/Features/checkout/cubit/checkout_cubit.dart';
 import 'package:flutter_application_hungray/Features/checkout/widgets/order_details-widget.dart';
 import 'package:flutter_application_hungray/shared/custom_button.dart';
+import 'package:flutter_application_hungray/shared/custom_snack.dart';
 import 'package:flutter_application_hungray/shared/custom_text.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
+import 'package:shimmer/shimmer.dart';
 
-class CheckoutView extends StatefulWidget {
-  const CheckoutView({super.key});
+class CheckoutView extends StatelessWidget {
+  const CheckoutView({super.key, required this.totalpric});
+  final String totalpric;
 
-  @override
-  State<CheckoutView> createState() => _CheckoutViewState();
-}
-
-class _CheckoutViewState extends State<CheckoutView> {
-  String selectedPaymentMethod = 'Visa';
   @override
   Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => ProfileCubit()..refresh()),
+        BlocProvider(create: (_) => CheckoutCubit()),
+      ],
+      child: BlocListener<ProfileCubit, ProfileState>(
+        listenWhen: (p, c) => c.message != null,
+        listener: (context, state) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(CustomSnackBar(state.message!));
+        },
+        child: Builder(builder: _buildScaffold),
+      ),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context) {
+    final cubit = context.read<CheckoutCubit>();
+    final selectedPaymentMethod = context.watch<CheckoutCubit>().state;
+    final userModel = context.watch<ProfileCubit>().state.user;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -37,10 +59,12 @@ class _CheckoutViewState extends State<CheckoutView> {
               ),
               Gap(10),
               OrderDetailsWidget(
-                order: '12.99',
+                order: totalpric,
                 taxes: '3.5',
-                deliveryFees: '2.4',
-                total: '100.00',
+                deliveryFees: '40.33',
+                total: (double.parse(totalpric) + 3.5 + 40.33).toStringAsFixed(
+                  2,
+                ),
                 estimatedTime: '15 - 30 m',
               ),
               Gap(80),
@@ -53,7 +77,7 @@ class _CheckoutViewState extends State<CheckoutView> {
 
               ///Cash on Delivery
               ListTile(
-                onTap: () => setState(() => selectedPaymentMethod = 'cash'),
+                onTap: () => cubit.selectPayment('cash'),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -73,49 +97,60 @@ class _CheckoutViewState extends State<CheckoutView> {
                   activeColor: Colors.white,
                   value: 'cash',
                   groupValue: selectedPaymentMethod,
-                  onChanged: (value) {
-                    setState(() => selectedPaymentMethod = value!);
-                  },
+                  onChanged: (value) => cubit.selectPayment(value!),
                 ),
               ),
               Gap(10),
 
               //Debit/Credit Card
-              ListTile(
-                onTap: () => setState(() => selectedPaymentMethod = 'Visa'),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: EdgeInsets.symmetric(
-                  vertical: 2,
-                  horizontal: 16,
-                ),
-                tileColor: Colors.blue.shade900,
-                leading: Image.asset(
-                  'assets/icons/visa.png',
-                  color: Colors.white,
-                ),
-                title: CustomText(
-                  text: 'Debit/Credit Card',
-                  fontweight: FontWeight.w400,
-                  fontsize: 16,
-                  color: Colors.white,
-                ),
-                subtitle: CustomText(
-                  text: '**** **** 1234   Visa, MasterCard, Amex',
-                  fontweight: FontWeight.w400,
-                  fontsize: 12,
-                  color: Colors.white,
-                ),
-                trailing: Radio<String>(
-                  activeColor: Colors.white,
-                  value: 'Visa',
-                  groupValue: selectedPaymentMethod,
-                  onChanged: (value) {
-                    setState(() => selectedPaymentMethod = value!);
-                  },
-                ),
-              ),
+              userModel?.visa == null
+                  ? SizedBox.shrink()
+                  : ListTile(
+                    onTap: () => cubit.selectPayment('Visa'),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 2,
+                      horizontal: 16,
+                    ),
+                    tileColor: Colors.blue.shade900,
+                    leading: Image.asset(
+                      'assets/icons/visa.png',
+                      color: Colors.white,
+                    ),
+                    title: CustomText(
+                      text: 'Debit/Credit Card',
+                      fontweight: FontWeight.w400,
+                      fontsize: 16,
+                      color: Colors.white,
+                    ),
+
+                    subtitle: SizedBox(
+                      height: 20,
+
+                      child: Shimmer.fromColors(
+                        baseColor: Colors.grey.shade700,
+                        highlightColor: Colors.grey.shade500,
+                        period: Duration(seconds: 2),
+
+                        child: CustomText(
+                          text:
+                              userModel?.visa ??
+                              '**** **** 1234   Visa, MasterCard, Amex',
+                          fontweight: FontWeight.w400,
+                          fontsize: 12,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    trailing: Radio<String>(
+                      activeColor: Colors.white,
+                      value: 'Visa',
+                      groupValue: selectedPaymentMethod,
+                      onChanged: (value) => cubit.selectPayment(value!),
+                    ),
+                  ),
               Gap(5),
               Row(
                 children: [
@@ -174,7 +209,8 @@ class _CheckoutViewState extends State<CheckoutView> {
                     fontsize: 18,
                   ),
                   CustomText(
-                    text: '\$12.99',
+                    text:
+                        '\$ ${(double.parse(totalpric) + 3.5 + 40.33).toStringAsFixed(2)}',
                     fontweight: FontWeight.bold,
                     fontsize: 24,
                   ),
@@ -194,7 +230,10 @@ class _CheckoutViewState extends State<CheckoutView> {
                         ),
                         backgroundColor: Colors.white,
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 30,
+                          ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.center,

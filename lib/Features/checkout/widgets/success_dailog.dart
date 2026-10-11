@@ -16,7 +16,10 @@ class SuccessDialog extends StatelessWidget {
         children: [
           Icon(Icons.check_circle, color: Colors.green, size: 60),
           SizedBox(height: 20),
-          Text('Payment Successful', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(
+            'Payment Successful',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           SizedBox(height: 10),
           Text('Your order has been placed successfully.'),
           SizedBox(height: 20),
